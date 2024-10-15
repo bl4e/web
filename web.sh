@@ -66,4 +66,6 @@ check_status "Moving web files to Nginx directory"
 systemctl restart nginx
 check_status "Final Nginx restart"
 
+
 echo "Setup complete!"
+
