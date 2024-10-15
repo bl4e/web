@@ -1,0 +1,53 @@
+! Configuration File for keepalived
+#辅区：
+global_defs {
+   router_id keepalived_12 #主辅组合ID码
+}
+
+vrrp_script Monitor_Nginx {
+    script "/etc/keepalived/monitor_nginx.sh" #监测脚本
+    interval 5
+    weight 2
+}
+
+vrrp_instance VI_1 {
+    state BACKUP #主
+    interface ens3 #网卡名字
+    virtual_router_id 12 #主辅组合ID码
+    priority 100 #权重
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 7777 #主辅配对密码
+    }
+    virtual_ipaddress {
+        166.16.0.99 #主辅组合虚拟IP，此IP为网段中的IP且不存在真实服务器
+    }
+    track_script {
+        Monitor_Nginx #调用监测脚本
+    }
+}
+
+
+#主区：
+global_defs {
+   router_id keepalived_21 #辅主组合ID码
+}
+
+vrrp_instance VI_2 {
+    state MASTER #主
+    interface ens3 #网卡名字
+    virtual_router_id 21 #主区组合ID码
+    priority 150 #权重
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 8888 #辅主配对密码
+    }
+    virtual_ipaddress {
+        166.16.0.199 #辅主组合虚拟IP，此IP为网段中的IP且不存在真实服务器
+    }
+    track_script {
+        Monitor_Nginx #调用监测脚本
+    }
+}
